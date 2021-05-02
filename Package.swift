@@ -7,6 +7,7 @@ let package = Package(
     name: "deft-mcp2221-i2c-gpio",
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
+        .executable(name: "example", targets: ["example"]),
         .library(
             name: "DeftMCP2221",
             targets: ["DeftMCP2221"]),
@@ -24,6 +25,12 @@ let package = Package(
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "SimpleUSB", package: "deft-simple-usb"),
+            ]),
+        .target(
+            name: "example",
+            dependencies: [
+                "DeftMCP2221",
+                .product(name: "PortableUSB", package: "deft-simple-usb"),
             ]),
         .testTarget(
             name: "DeftMCP2221Tests",

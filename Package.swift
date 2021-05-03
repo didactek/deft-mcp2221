@@ -15,7 +15,6 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-        .package(url: "https://github.com/didactek/deft-simple-usb", "0.0.1" ..< "0.1.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -24,14 +23,20 @@ let package = Package(
             name: "DeftMCP2221",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "SimpleUSB", package: "deft-simple-usb"),
             ]),
         .target(
             name: "example",
             dependencies: [
                 "DeftMCP2221",
-                .product(name: "PortableUSB", package: "deft-simple-usb"),
             ]),
+        .systemLibrary(
+            name: "CHidApi",
+            pkgConfig: "hidapi",
+            providers: [
+                .brew(["hidapi"]),
+                .apt(["libhidapi-libusb0"]),
+            ]
+        ),
         .testTarget(
             name: "DeftMCP2221Tests",
             dependencies: ["DeftMCP2221"]),

@@ -10,7 +10,6 @@
 
 import Foundation
 import Logging
-import SimpleUSB
 
 let logger = Logger(label: "com.didactek.deft-mcp2221-i2c-gpio.usb")
 
@@ -20,7 +19,8 @@ public class DeftMCP2221 {
     /// USBPIDH REGISTER and USBPIDL REGISTER (Register 1-8 and 1-7)
     public static let defaultIdProduct = 0x00dd
 
-    public init(adapter: USBDevice) throws {
+    // FIXME: pass HID
+    public init() throws {
     }
 
     public func write(data: Data) {

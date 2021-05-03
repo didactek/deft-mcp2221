@@ -1,0 +1,4 @@
+module CHidApi [system] {
+  header "CHidApiUmbrella.h"
+  export *
+}

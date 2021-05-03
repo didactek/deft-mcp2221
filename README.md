@@ -1,15 +1,14 @@
 # deft-mcp2221-i2c-gpio
 
-A Swift library for using the Microchip MCP2221A USB breakout adapter in I2C applications. and GPIO applications. Uses the deft-simple-usb library for pure-Swift usermode USB support on macOS
-or the libusb system library bridged to Swift on Linux.
-
+A Swift library for using the Microchip MCP2221A USB breakout adapter in I2C and GPIO applications. Uses the
+[libusb HID API](https://github.com/libusb/hidapi) system library bridged to Swift to interface with the drivers provided by the host OS.
 
 ## Overview
 
 This library provides
 - support for a USB-connected MCP2221A device communicating in its HID mode
 - deft-devices compatible implementation of I2C read/write/read-and-write, with clock stretching support provided by the adapter
-- uses deft-simple-usb for usermode access to the device
+- uses libusb/hidapi for usermode access to the device
 
 
 ## Requirements
@@ -20,13 +19,15 @@ This library provides
 
 Mac requirements
 - macOS 10.15 (Catalina) or higher
+- brew (for installing hidapi)
+- hidapi (to link with)
+- pkg-config (to notify SPM where to find the hidapi library)
 
 SPM Dependencies
 - swift-log
-- deft-simple-usb (transitively)
 
 Linux dependencies
-- libusb
+- hidapi
 
 
 ## Implementation
@@ -38,10 +39,31 @@ For non-UART mode, the basic pattern is to send a 64-byte request and get a 64-b
 Formats of the request and response are well-documented in the datasheet. Operations cover
 pin and protocol configuration, queries for ADC and GPIO, and high-level I2C operations.
 
-Presumably, request/response is made using USB bulk transfer operations. The datasheet
-suggests the device offers two configurations: one for UART and the other presents as HID.
-The details of accessing the HID mode are TBD.
+On macOS, the HID side of the adapter is bound to a system driver (AppleUserUSBHostHIDDevice), and attempts to open
+the interface are rebuffed with (slightly formatted):
 
+  Error Domain=IOUSBHostErrorDomain Code=-536870203
+  "Failed to create IOUSBHostObject."
+  UserInfo={NSLocalizedRecoverySuggestion=Another client likely has exclusive access., 
+    NSLocalizedDescription=Failed to create IOUSBHostObject., NSLocalizedFailureReason=Exclusive open of usb object failed.}
+
+using the deft-simple-usb package, or simply:
+
+  Access denied (insufficient permissions)
+
+using libusb.
+  
+The datasheet indicates the device offers two configurations: one for UART and the other (for I2C, GPIO, and ADC/DAC) presents as HID.
+
+Swift doesn't yet appear to recommend a framework for accessing HID. The IOHIDManager interface seems to be the
+way to access HID, and it is Objective-C and part of IOKit. (Note the documentation for IOKit suggests it has been replaced
+by DriverKit, but this is only true for the kernel-mode facets of IOKit.
+Usermode access to HID devices remains possible in Catalina and beyond.)
+
+This implementation uses hidapi for its portability and its compact interface. (The macOS hidapi wraps the IOKit frameworks mentioned above.)
+A future version should move to a framework based implementation, especially if an idiomatic Swift API becomes
+available. A framework-based implementation would eliminate the dependence on brew and additional components, which would
+simplify use of this package.
 
 
 ## Installation Notes

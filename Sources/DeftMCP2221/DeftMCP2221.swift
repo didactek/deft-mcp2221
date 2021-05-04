@@ -20,28 +20,34 @@ public class DeftMCP2221 {
     /// USBPIDH REGISTER and USBPIDL REGISTER (Register 1-8 and 1-7)
     public static let defaultIdProduct = 0x00dd
 
+    let adapter: HIDDevice
+
     public init(adapter: HIDDevice) throws {
-        // FIXME: implement
+        self.adapter = adapter
+
+        // FIXME: set to I2C mode
         fatalError("Unimplemented")
     }
 
+    /// I2C operation
     public func write(data: Data) {
         // FIXME: implement
         fatalError("Unimplemented")
     }
 
+    /// I2C operation
     public func read(count: Int) -> Data {
         // FIXME: implement
         fatalError("Unimplemented")
     }
 
+    /// I2C operation
     public func writeAndRead(sendFrom: Data, receiveCount: Int) -> Data {
         // FIXME: implement
         fatalError("Unimplemented")
     }
 
     public func supportsClockStretching() -> Bool {
-        // FIXME: implement
-        fatalError("Unimplemented")
+        return true
     }
 }

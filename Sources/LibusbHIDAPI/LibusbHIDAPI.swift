@@ -22,5 +22,6 @@ public class LibusbHIDAPI {
     }
 
     public init() {
+        // FIXME: (long-term) make this a singleton; add calls to hid_init and hid_exit
     }
 }

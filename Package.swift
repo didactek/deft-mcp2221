@@ -11,6 +11,7 @@ let package = Package(
         .library(
             name: "DeftMCP2221",
             targets: ["DeftMCP2221"]),
+        .library(name: "LibusbHIDAPI", targets: ["LibusbHIDAPI"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -22,6 +23,7 @@ let package = Package(
         .target(
             name: "DeftMCP2221",
             dependencies: [
+                "LibusbHIDAPI",
                 .product(name: "Logging", package: "swift-log"),
             ]),
         .target(
@@ -29,6 +31,9 @@ let package = Package(
             dependencies: [
                 "DeftMCP2221",
             ]),
+        .target(
+            name: "LibusbHIDAPI",
+            dependencies: ["CHidApi"]),
         .systemLibrary(
             name: "CHidApi",
             pkgConfig: "hidapi",

@@ -9,9 +9,14 @@
 
 import Foundation
 import DeftMCP2221
+import LibusbHIDAPI
 
 do {
     // idVendor: DeftMCP2221.defaultIdVendor
     // idProduct: DeftMCP2221.defaultIdProduct
-    let breakout = try! DeftMCP2221()
+    let hidAPI = LibusbHIDAPI()
+    let device = try! hidAPI.open(idVendor: DeftMCP2221.defaultIdVendor,
+                                  idProduct: DeftMCP2221.defaultIdProduct)
+
+    let breakout = try! DeftMCP2221(adapter: device)
 }

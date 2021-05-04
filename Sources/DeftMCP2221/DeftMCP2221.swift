@@ -10,6 +10,7 @@
 
 import Foundation
 import Logging
+import LibusbHIDAPI
 
 let logger = Logger(label: "com.didactek.deft-mcp2221-i2c-gpio.usb")
 
@@ -19,8 +20,9 @@ public class DeftMCP2221 {
     /// USBPIDH REGISTER and USBPIDL REGISTER (Register 1-8 and 1-7)
     public static let defaultIdProduct = 0x00dd
 
-    // FIXME: pass HID
-    public init() throws {
+    public init(adapter: HIDDevice) throws {
+        // FIXME: implement
+        fatalError("Unimplemented")
     }
 
     public func write(data: Data) {

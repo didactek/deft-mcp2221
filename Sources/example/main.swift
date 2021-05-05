@@ -18,5 +18,5 @@ do {
     let device = try! hidAPI.open(idVendor: DeftMCP2221.defaultIdVendor,
                                   idProduct: DeftMCP2221.defaultIdProduct)
 
-    let breakout = try! DeftMCP2221(adapter: device)
+    let breakout = try! DeftMCP2221(adapter: device, nodeAddress: 0x40)
 }

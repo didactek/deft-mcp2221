@@ -10,6 +10,14 @@ This library provides
 - deft-devices compatible implementation of I2C read/write/read-and-write, with clock stretching support provided by the adapter
 - uses libusb/hidapi for usermode access to the device
 
+## The Device
+
+The MCP2221 is a very easy device to program for.
+
+I2C is provided on dedicated pins and is always available. Clock stretching is supported by the chip.
+
+Built-in commands support formatting start/repeated-start/stop frames.
+
 
 ## Requirements
 

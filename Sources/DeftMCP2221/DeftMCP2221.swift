@@ -37,8 +37,12 @@ public class DeftMCP2221 {
         // - interrupt generation
         // - altering device identification (vendor/product IDs; serial number)
         // - passcode protecting configuration
+    }
 
-        fatalError("Unimplemented")
+    public convenience init(nodeAddress: Int) throws {
+        let bus = LibusbHIDAPI()
+        let adapter = try! bus.open(idVendor: Self.defaultIdVendor, idProduct: Self.defaultIdProduct)
+        try! self.init(adapter: adapter, nodeAddress: nodeAddress)
     }
 
     enum CommandCode: UInt8 {
@@ -52,6 +56,8 @@ public class DeftMCP2221 {
         case readData = 0x91
         /// 3.1.9 Repeated-start / Read / Stop
         case readDataRepeatedStart = 0x93
+        /// 3.1.10 read data back from the device
+        case getData = 0x40
     }
 
     /// Build a command buffer, populated with command code, I2C operation length, and address
@@ -71,59 +77,77 @@ public class DeftMCP2221 {
         return packet
     }
 
-    /// Internal: issue write requests until
-    func write(data: Data, commandCode: CommandCode) {
+    /// Internal: issue write requests in buffer segments until data is exhausted
+    func bufferedWrite(data: Data, commandCode: CommandCode) {
         // 3.1.5 I2C WRITE DATA
 
         var request = makeRequest(commandCode: commandCode, length: data.count, forWriting: true)
 
         var bytesWritten = 0
         while bytesWritten < data.count {
-            let chunkCount = max(60, data.count - bytesWritten)
-            request.replaceSubrange(4...(4 + chunkCount), with: data[bytesWritten ... (bytesWritten + chunkCount)])
+            let chunkCount = min(60, data.count - bytesWritten)
+            request.replaceSubrange(4...(4 + chunkCount), with: data[bytesWritten ..< (bytesWritten + chunkCount)])
             try! adapter.write(packet: request)
             let response = try! adapter.read()
-            let responseCode = response[1] // Table 3-2
             guard request[0] == response[0] else {
                 fatalError("response does not match request")
             }
-            guard responseCode == 0 else {
-                fatalError("non-successful response to write (\(responseCode)")
-            }
+//            let responseCode = response[1] // Table 3-2
+//            guard responseCode == 0 else {
+//                fatalError("non-successful response to write (\(responseCode))")
+//            }
             bytesWritten += chunkCount
         }
     }
 
     /// I2C operation
     public func write(data: Data) {
-        write(data: data, commandCode: .writeData)
+        bufferedWrite(data: data, commandCode: .writeData)
     }
 
     /// Internal: issue repeated requests until response data fills expected count
-    func read(commandCode: CommandCode, count: Int) -> Data {
+    func bufferedRead(commandCode: CommandCode, count: Int) -> Data {
         let requestPacket = makeRequest(commandCode: commandCode, length: count, forWriting: false)
 
+        try! adapter.write(packet: requestPacket)
+        let response = try! adapter.read()
+        guard requestPacket[0] == response[0] else {
+            fatalError("response does not match request")
+        }
+//        guard requestPacket[1] == 0 else {
+//            fatalError("result code \(requestPacket[1]): device busy?")
+//        }
+
         var result = Data()
+        let requestData = Data([CommandCode.getData.rawValue]) + Data(count: 63)
+
         while result.count < count {
-            try! adapter.write(packet: requestPacket)
+            try! adapter.write(packet: requestData)
             let response = try! adapter.read()
-            guard requestPacket[0] == response[0] else {
+            guard requestData[0] == response[0] else {
                 fatalError("response does not match request")
             }
-            result.append(response.dropFirst(4))
+            guard response[1] == 0 else {
+                fatalError("getData unsuccessful")
+            }
+            let readCount = Int(response[3])
+            guard readCount <= 60 else {
+                fatalError("signal to ignore data")
+            }
+            result.append(response.dropFirst(4).prefix(readCount))
         }
         return result
     }
 
     /// I2C operation
     public func read(count: Int) -> Data {
-        return read(commandCode: .readData, count: count)
+        return bufferedRead(commandCode: .readData, count: count)
     }
 
     /// I2C operation
     public func writeAndRead(sendFrom: Data, receiveCount: Int) -> Data {
-        write(data: sendFrom, commandCode: .writeNoStop)
-        return read(commandCode: .readDataRepeatedStart, count: receiveCount)
+        bufferedWrite(data: sendFrom, commandCode: .writeNoStop)
+        return bufferedRead(commandCode: .readDataRepeatedStart, count: receiveCount)
     }
 
     public func supportsClockStretching() -> Bool {

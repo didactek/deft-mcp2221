@@ -16,7 +16,7 @@ public class HIDDevice {
 
     /// - parameter bufferSize: Size of reads and writes. Typically needs an extra byte for the report
     /// number.
-    public init(handle: OpaquePointer, bufferSize: Int = 65) throws {
+    public init(handle: OpaquePointer, bufferSize: Int = 64) throws {
         self.deviceHandle = handle
         self.bufferSize = bufferSize
     }

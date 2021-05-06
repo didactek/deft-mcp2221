@@ -10,14 +10,6 @@ This library provides
 - deft-devices compatible implementation of I2C read/write/read-and-write, with clock stretching support provided by the adapter
 - uses libusb/hidapi for usermode access to the device
 
-## The Device
-
-The MCP2221 is a very easy device to program for.
-
-I2C is provided on dedicated pins and is always available. Clock stretching is supported by the chip.
-
-Built-in commands support formatting start/repeated-start/stop frames.
-
 
 ## Requirements
 
@@ -38,6 +30,27 @@ Linux dependencies
 - hidapi
 
 
+## The Device
+
+### I2C
+
+The device offers two configurations (a "combo adapter"): one for UART and the other
+(for I2C, GPIO, and ADC/DAC) presents as HID.
+
+The MCP2221 provides a high-level API for working with I2C on dedicated pins. Clock stretching is supported.
+
+Built-in commands support formatting start/repeated-start/stop frames. Commands are issued via
+HID read/write. For data transfer operations, 60 bytes of data is encoded in the 64 byte HID packet.
+
+### Quirks
+
+- It appears that putting some load on the 5V pin makes the device fail to initialize when connected
+to the bus. Diagnose by asking host OS to enumerate USB devices. Taking the load off the 5V pin 
+temporarily causes the device to connect to the host OS: reconnecting load works from then on.
+This could be an issue with power-on current request and it might be that changing some of the
+power-on defaults could fix things.
+
+
 ## Implementation
 
 Based on the [datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/MCP2221A-Data-Sheet-DS20005565D.pdf).
@@ -47,8 +60,10 @@ For non-UART mode, the basic pattern is to send a 64-byte request and get a 64-b
 Formats of the request and response are well-documented in the datasheet. Operations cover
 pin and protocol configuration, queries for ADC and GPIO, and high-level I2C operations.
 
-On macOS, the HID side of the adapter is bound to a system driver (AppleUserUSBHostHIDDevice), and attempts to open
-the interface are rebuffed with (slightly formatted):
+### HID vs IOUSBHost
+
+On macOS, the HID side of the combo adapter is bound to a system driver (AppleUserUSBHostHIDDevice), and attempts to open
+the interface as usermode USB are rebuffed with (slightly formatted):
 
   Error Domain=IOUSBHostErrorDomain Code=-536870203
   "Failed to create IOUSBHostObject."
@@ -60,8 +75,8 @@ using the deft-simple-usb package, or simply:
   Access denied (insufficient permissions)
 
 using libusb.
-  
-The datasheet indicates the device offers two configurations: one for UART and the other (for I2C, GPIO, and ADC/DAC) presents as HID.
+
+## libusb/hidapi
 
 Swift doesn't yet appear to recommend a framework for accessing HID. The IOHIDManager interface seems to be the
 way to access HID, and it is Objective-C and part of IOKit. (Note the documentation for IOKit suggests it has been replaced

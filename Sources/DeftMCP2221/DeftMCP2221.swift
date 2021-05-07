@@ -12,7 +12,7 @@ import Foundation
 import Logging
 import LibusbHIDAPI
 
-let logger = Logger(label: "com.didactek.deft-mcp2221-i2c-gpio.usb")
+let logger = Logger(label: "com.didactek.deft-mcp2221.usb")
 
 public class DeftMCP2221 {
     /// USBVIDH REGISTER and USBVIDL REGISTER (Register 1-6 and 1-5)
@@ -41,8 +41,8 @@ public class DeftMCP2221 {
 
     public convenience init(nodeAddress: Int) throws {
         let bus = LibusbHIDAPI()
-        let adapter = try! bus.open(idVendor: Self.defaultIdVendor, idProduct: Self.defaultIdProduct)
-        try! self.init(adapter: adapter, nodeAddress: nodeAddress)
+        let adapter = try bus.open(idVendor: Self.defaultIdVendor, idProduct: Self.defaultIdProduct)
+        try self.init(adapter: adapter, nodeAddress: nodeAddress)
     }
 
     enum CommandCode: UInt8 {

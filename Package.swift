@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "deft-mcp2221-i2c-gpio",
+    name: "deft-mcp2221",
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         // No need to export as part of product, but can still run locally:

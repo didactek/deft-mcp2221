@@ -1,6 +1,6 @@
-# deft-mcp2221-i2c-gpio
+# deft-mcp2221
 
-A Swift library for using the Microchip MCP2221A USB breakout adapter in I2C and GPIO applications. Uses the
+A Swift library for using the Microchip MCP2221A USB breakout adapter in I2C applications. Uses the
 [libusb HID API](https://github.com/libusb/hidapi) system library bridged to Swift to interface with the drivers provided by the host OS.
 
 ## Overview

@@ -12,11 +12,13 @@ import Foundation
 import CHidApi
 
 public class LibusbHIDAPI {
+    enum HidError: Error {
+        case deviceNotOpened
+    }
     public func open(idVendor: Int, idProduct: Int) throws -> HIDDevice {
         let deviceHandlePtr = hid_open(UInt16(idVendor), UInt16(idProduct), nil)
         guard let deviceHandle = deviceHandlePtr else {
-            // FIXME: throw
-            fatalError("device not opened")
+            throw HidError.deviceNotOpened
         }
         return try HIDDevice(handle: deviceHandle)
     }

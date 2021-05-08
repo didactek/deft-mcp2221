@@ -34,17 +34,30 @@ let package = Package(
             ]),
         .target(
             name: "LibusbHIDAPI",
-            dependencies: ["CHidApi"]),
+            dependencies: [
+                .target(name: "CHidApiLinux", condition: .when(platforms: [.linux])),
+                .target(name: "CHidApi", condition: .when(platforms: [.macOS])),
+            ]
+        ),
+        // CHidApi and CHidApiLinux libraries are the same in function and content;
+        // they are duplicated here to work around the difficulty that they have different
+        // pkg-config names on Linux and under brew.
         .systemLibrary(
             name: "CHidApi",
             pkgConfig: "hidapi",
             providers: [
                 .brew(["hidapi"]),
-                .apt(["libhidapi-libusb0"]),
             ]
         ),
-        .testTarget(
-            name: "DeftMCP2221Tests",
-            dependencies: ["DeftMCP2221"]),
+        .systemLibrary(
+            name: "CHidApiLinux",
+            pkgConfig: "hidapi-libusb",
+            providers: [
+                .apt(["libhidapi-dev"]),
+            ]
+        ),
+        //.testTarget(
+        //    name: "DeftMCP2221Tests",
+        //    dependencies: ["DeftMCP2221"]),
     ]
 )

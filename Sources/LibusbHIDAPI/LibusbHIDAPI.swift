@@ -9,7 +9,13 @@
 
 
 import Foundation
+#if canImport(CHidApi)
 import CHidApi
+#endif
+#if canImport(CHidApiLinux)
+import CHidApiLinux
+#endif
+
 
 public class LibusbHIDAPI {
     enum HidError: Error {

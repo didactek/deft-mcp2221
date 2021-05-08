@@ -1,0 +1,4 @@
+module CHidApiLinux [system] {
+  header "CHidApiLinuxUmbrella.h"
+  export *
+}

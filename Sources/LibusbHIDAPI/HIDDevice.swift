@@ -16,12 +16,17 @@ import CHidApiLinux
 #endif
 
 public class HIDDevice {
+    enum HIDError: Error {
+        case incompleteWrite(String)
+        case incompleteRead(String)
+    }
+
     let deviceHandle: OpaquePointer
     let bufferSize: Int
 
     /// - parameter bufferSize: Size of reads and writes. Typically needs an extra byte for the report
     /// number.
-    public init(handle: OpaquePointer, bufferSize: Int = 64) throws {
+    public init(handle: OpaquePointer, bufferSize: Int = 64) {
         self.deviceHandle = handle
         self.bufferSize = bufferSize
     }
@@ -31,13 +36,13 @@ public class HIDDevice {
         guard packet.count <= bufferSize else {
             fatalError("Requested outgoing packet size (\(packet.count)) is larger than device capability \(bufferSize))")
         }
-        var packetCopy = packet + Data(count: bufferSize - packet.count)
+        var paddedPacket = packet + Data(count: bufferSize - packet.count)
 
-        let bytesSent = packetCopy.withUnsafeMutableBytes {
+        let bytesSent = paddedPacket.withUnsafeMutableBytes {
             hid_write(deviceHandle, $0.bindMemory(to: UInt8.self).baseAddress, bufferSize)
         }
         guard bytesSent == bufferSize else {
-            fatalError("Only \(bytesSent) of \(bufferSize) written")
+            throw HIDError.incompleteWrite("Only \(bytesSent) of \(bufferSize) written")
         }
     }
 
@@ -47,7 +52,7 @@ public class HIDDevice {
             hid_read(deviceHandle, $0.bindMemory(to: UInt8.self).baseAddress, bufferSize)
         }
         guard bytesReceived == bufferSize else {
-            fatalError("Only \(bytesReceived) of \(bufferSize) read")
+            throw HIDError.incompleteRead("Only \(bytesReceived) of \(bufferSize) read")
         }
         return buffer
     }

@@ -26,7 +26,7 @@ public class LibusbHIDAPI {
         guard let deviceHandle = deviceHandlePtr else {
             throw HidError.deviceNotOpened
         }
-        return try HIDDevice(handle: deviceHandle)
+        return HIDDevice(handle: deviceHandle)
     }
 
     public init() {

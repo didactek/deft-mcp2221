@@ -18,5 +18,6 @@ do {
     let device = try! hidAPI.open(idVendor: DeftMCP2221.defaultIdVendor,
                                   idProduct: DeftMCP2221.defaultIdProduct)
 
-    let breakout = try! DeftMCP2221(adapter: device, nodeAddress: 0x40)
+    let breakout = try! DeftMCP2221(adapter: device, nodeAddress: 0x18) //0x60 == TEA5767; 0x18 == MCP9808
+    print(try! breakout.read(count: 1))
 }

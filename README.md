@@ -27,7 +27,7 @@ SPM Dependencies
 - swift-log
 
 Linux dependencies
-- hidapi
+- libhidapi-dev
 
 
 ## The Device
@@ -50,6 +50,9 @@ temporarily causes the device to connect to the host OS: reconnecting load works
 This could be an issue with power-on current request and it might be that changing some of the
 power-on defaults could fix things.
 
+- If an I2C command returns an error code, the bus will be invalidated and subsequent operations
+will fail until the bus is reset.
+
 
 ## Implementation
 
@@ -65,9 +68,9 @@ pin and protocol configuration, queries for ADC and GPIO, and high-level I2C ope
 On macOS, the HID side of the combo adapter is bound to a system driver (AppleUserUSBHostHIDDevice), and attempts to open
 the interface as usermode USB are rebuffed with (slightly formatted):
 
-  Error Domain=IOUSBHostErrorDomain Code=-536870203
-  "Failed to create IOUSBHostObject."
-  UserInfo={NSLocalizedRecoverySuggestion=Another client likely has exclusive access., 
+    Error Domain=IOUSBHostErrorDomain Code=-536870203
+    "Failed to create IOUSBHostObject."
+    UserInfo={NSLocalizedRecoverySuggestion=Another client likely has exclusive access., 
     NSLocalizedDescription=Failed to create IOUSBHostObject., NSLocalizedFailureReason=Exclusive open of usb object failed.}
 
 using the deft-simple-usb package, or simply:
@@ -87,24 +90,3 @@ This implementation uses hidapi for its portability and its compact interface. (
 A future version should move to a framework based implementation, especially if an idiomatic Swift API becomes
 available. A framework-based implementation would eliminate the dependence on brew and additional components, which would
 simplify use of this package.
-
-
-## Installation Notes
-
-### Linux device permissions
-
-On Linux, users will not have access to a hot-plugged USB device by default. 
-The cleanest way to systematically grant permissions to the device is to set up a udev
-rule that adjusts permissions whenever the device is connected.
-
-The paths and group in the template below assume:
-- Configuration files are under /etc/udev/rules.d
-- The group 'plugdev' exists and includes the user wanting to use the device
-
-Under /etc/udev/rules.d/, create a file (suggested name: "70-gpio-microchip-mcp2221a.rules") with the contents:
-
-    # Microchip MCP2221A USB -> I2C + UART Combo Adapter
-    # 2021-05-02 support working with the MCP2221A using Swift deft-mcp221-i2c-gpio library
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="00dd", MODE="660", GROUP="plugdev"
-
-eLinux.org has a useful wiki entry on [accessing devices without sudo](https://elinux.org/Accessing_Devices_without_Sudo).

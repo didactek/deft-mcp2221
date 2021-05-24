@@ -90,3 +90,25 @@ This implementation uses hidapi for its portability and its compact interface. (
 A future version should move to a framework based implementation, especially if an idiomatic Swift API becomes
 available. A framework-based implementation would eliminate the dependence on brew and additional components, which would
 simplify use of this package.
+
+
+## Installation Notes
+
+### Linux device permissions
+
+On Linux, deft-mcp2221 uses the libusb backend for hidapi.
+Users do not have access to a hot-plugged USB device by default; permission needs to be configured.
+The cleanest way to systematically grant permissions to the device is to set up a udev
+rule that adjusts permissions whenever the device is connected.
+
+The paths and group in the template below assume:
+- Configuration files are under /etc/udev/rules.d
+- The group 'plugdev' exists and includes the user wanting to use the device
+
+Under /etc/udev/rules.d/, create a file (suggested name: "70-gpio-microchip-mcp2221a.rules") with the contents:
+
+    # Microchip MCP2221A USB -> I2C + UART Combo Adapter
+    # 2021-05-02 support working with the MCP2221A using Swift deft-mcp221-i2c-gpio library
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="00dd", GROUP="plugdev"
+
+eLinux.org has a useful wiki entry on [accessing devices without sudo](https://elinux.org/Accessing_Devices_without_Sudo).

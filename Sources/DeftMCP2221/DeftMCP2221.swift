@@ -9,10 +9,10 @@
 
 
 import Foundation
-import Logging
+import DeftLog
 import LibusbHIDAPI
 
-var logger = Logger(label: "com.didactek.deft-mcp2221.usb")
+let logger = DeftLog.logger(label: "com.didactek.deft-mcp2221.usb")
 
 enum MCP2221Error: Error {
     case defaultAdapterNotFound
@@ -28,7 +28,6 @@ public class DeftMCP2221 {
 
     /// Singleton connection to the adapter, if found using default Vendor and Product IDs.
     public static var defaultAdapter: HIDDevice? = {
-        logger.logLevel = .debug
         let bus = LibusbHIDAPI()
         let adapter = try? bus.open(idVendor: DeftMCP2221.defaultIdVendor,
                                     idProduct: DeftMCP2221.defaultIdProduct)

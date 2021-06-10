@@ -24,10 +24,20 @@ Mac requirements
 - pkg-config (to notify SPM where to find the hidapi library)
 
 SPM Dependencies
-- swift-log
+- deft-log (transitively: swift-log)
 
 Linux dependencies
 - libhidapi-dev
+
+
+## Usage
+
+### Communicating with an I2C device
+
+### Logging
+
+Loggers are instantiated using the [deft-log](https://github.com/didactek/deft-log.git) library
+using the label prefix `com.didactek.deft-mcp2221`.
 
 
 ## The Device
@@ -78,6 +88,9 @@ using the deft-simple-usb package, or simply:
   Access denied (insufficient permissions)
 
 using libusb.
+
+These errors should be interpreted as a reminder that the system makes the
+device available to userspace applications through the HID API.
 
 ## libusb/hidapi
 

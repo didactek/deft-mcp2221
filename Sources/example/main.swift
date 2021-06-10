@@ -8,12 +8,12 @@
 //
 
 import Foundation
+import DeftLog
 import DeftMCP2221
 import LibusbHIDAPI
 
 do {
-    // idVendor: DeftMCP2221.defaultIdVendor
-    // idProduct: DeftMCP2221.defaultIdProduct
+    DeftLog.settings = [ ("com.didactek", .trace) ]
     let hidAPI = LibusbHIDAPI()
     let device = try! hidAPI.open(idVendor: DeftMCP2221.defaultIdVendor,
                                   idProduct: DeftMCP2221.defaultIdProduct)
